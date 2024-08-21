@@ -771,9 +771,9 @@ BEGIN
 			(
 				SELECT
 					DatabaseName	= [Database].DatabaseName ,
-					SchemaName		= FragmentedIndexes.SchemaName ,
-					TableName		= FragmentedIndexes.TableName ,
-					IndexName		= FragmentedIndexes.IndexName
+					SchemaName		= FragmentedIndex.SchemaName ,
+					TableName		= FragmentedIndex.TableName ,
+					IndexName		= FragmentedIndex.IndexName
 				FROM
 					(
 						SELECT DISTINCT
@@ -784,9 +784,9 @@ BEGIN
 					AS
 						[Database]
 				INNER JOIN
-					#FragmentedIndexes AS FragmentedIndexes
+					#FragmentedIndexes AS FragmentedIndex
 				ON
-					[Database].DatabaseName = FragmentedIndexes.DatabaseName
+					[Database].DatabaseName = FragmentedIndex.DatabaseName
 				ORDER BY
 					DatabaseName	ASC ,
 					SchemaName		ASC ,
@@ -1247,10 +1247,10 @@ BEGIN
 			Title					= N'Max Memory Configuration Too High' ,
 			RequiresAttention		=
 				CASE
-					WHEN @AdditionalInfo IS NULL
-						THEN 0
+					WHEN @CurrentMaxMemorySetting_MB > @RecommendedMaxMemorySetting_MB
+						THEN 1
 					ELSE
-						1
+						0
 				END ,
 			CurrentStateImpact		= 2 ,	-- Medium
 			RecommendationEffort	= 1 ,	-- Low
@@ -1391,6 +1391,232 @@ BEGIN
 		END
 		ELSE
 		BEGIN
+
+			BREAK;
+
+		END;
+
+	END CATCH;
+
+END;
+
+
+-- Check #11 - Columns with the IMAGE, TEXT, or NTEXT Data Types
+
+SET @DeadlockRetry = 0;
+SET @CheckId = 11;
+
+WHILE
+	1 = 1
+BEGIN
+
+	BEGIN TRY
+
+		DROP TABLE IF EXISTS
+			#ColumnsWithObsoleteDataTypes;
+
+		CREATE TABLE
+			#ColumnsWithObsoleteDataTypes
+		(
+			DatabaseName	SYSNAME	NOT NULL ,
+			SchemaName		SYSNAME	NOT NULL ,
+			TableName		SYSNAME	NOT NULL ,
+			ColumnName		SYSNAME	NOT NULL ,
+			DataType		SYSNAME	NOT NULL
+		);
+
+		IF
+			CURSOR_STATUS ('local' , N'DatabasesCursor') = -3
+		BEGIN
+
+			DECLARE
+				DatabasesCursor
+			CURSOR
+				LOCAL
+				FAST_FORWARD
+			FOR
+				SELECT
+					DatabaseName = [name]
+				FROM
+					sys.databases
+				WHERE
+					database_id > 4;	-- Only User Databases
+
+		END
+		ELSE
+		BEGIN
+
+			CLOSE DatabasesCursor;
+
+		END;
+
+		OPEN DatabasesCursor;
+
+		FETCH NEXT FROM
+			DatabasesCursor
+		INTO
+			@DatabaseName;
+
+		WHILE
+			@@FETCH_STATUS = 0
+		BEGIN
+
+			SET @Command =
+				N'
+					USE
+						' + QUOTENAME (@DatabaseName) + N';
+
+					INSERT INTO
+						#ColumnsWithObsoleteDataTypes
+					(
+						DatabaseName ,
+						SchemaName ,
+						TableName ,
+						ColumnName ,
+						DataType
+					)
+					SELECT
+						DatabaseName	= DB_NAME () ,
+						SchemaName		= SCHEMA_NAME (Tables.schema_id) ,
+						TableName		= Tables.name ,
+						ColumnName		= Columns.name ,
+						DataType		= Types.name
+					FROM
+						sys.tables AS Tables
+					INNER JOIN
+						sys.columns AS Columns
+					ON
+						Tables.object_id = Columns.object_id
+					INNER JOIN
+						sys.types AS Types
+					ON
+						Columns.system_type_id = Types.system_type_id
+					WHERE
+						Types.system_type_id IN (34,35,99);
+
+				';
+
+			EXECUTE sys.sp_executesql
+				@stmt = @Command;
+
+			FETCH NEXT FROM
+				DatabasesCursor
+			INTO
+				@DatabaseName;
+
+		END;
+
+		CLOSE DatabasesCursor;
+
+		DEALLOCATE DatabasesCursor;
+
+		SET @AdditionalInfo =
+			(
+				SELECT
+					DatabaseName	= [Database].DatabaseName ,
+					SchemaName		= [Column].SchemaName ,
+					TableName		= [Column].TableName ,
+					ColumnName		= [Column].ColumnName ,
+					DataType		= [Column].DataType
+				FROM
+					(
+						SELECT DISTINCT
+							DatabaseName
+						FROM
+							#ColumnsWithObsoleteDataTypes
+					)
+					AS
+						[Database]
+				INNER JOIN
+					#ColumnsWithObsoleteDataTypes AS [Column]
+				ON
+					[Database].DatabaseName = [Column].DatabaseName
+				ORDER BY
+					DatabaseName	ASC ,
+					SchemaName		ASC ,
+					TableName		ASC ,
+					ColumnName		ASC
+				FOR XML
+					AUTO ,
+					ROOT (N'ColumnsWithObsoleteDataTypes')
+			);
+
+		INSERT INTO
+			#Checks
+		(
+			CheckId ,
+			Title ,
+			RequiresAttention ,
+			CurrentStateImpact ,
+			RecommendationEffort ,
+			RecommendationRisk ,
+			AdditionalInfo
+		)
+		SELECT
+			CheckId					= @CheckId ,
+			Title					= N'Columns with the IMAGE, TEXT, or NTEXT Data Types' ,
+			RequiresAttention		=
+				CASE
+					WHEN @AdditionalInfo IS NULL
+						THEN 0
+					ELSE
+						1
+				END ,
+			CurrentStateImpact		= 1 ,	-- Low
+			RecommendationEffort	= 2 ,	-- Medium
+			RecommendationRisk		= 2 ,	-- Medium
+			AdditionalInfo			= @AdditionalInfo;
+
+		DROP TABLE
+			#ColumnsWithObsoleteDataTypes;
+
+		BREAK;
+
+	END TRY
+	BEGIN CATCH
+
+		INSERT INTO
+			#Errors
+		(
+			CheckId ,
+			ErrorNumber ,
+			ErrorMessage ,
+			ErrorSeverity ,
+			ErrorState ,
+			IsDeadlockRetry
+		)
+		SELECT
+			CheckId			= @CheckId ,
+			ErrorNumber		= ERROR_NUMBER () ,
+			ErrorMessage	= ERROR_MESSAGE () ,
+			ErrorSeverity	= ERROR_SEVERITY () ,
+			ErrorState		= ERROR_STATE () ,
+			IsDeadlockRetry	= @DeadlockRetry;
+
+		IF
+			ERROR_NUMBER () = 1205	-- Deadlock
+		AND
+			@DeadlockRetry = 0
+		BEGIN
+
+			SET @DeadlockRetry = 1
+
+		END
+		ELSE
+		BEGIN
+
+			DROP TABLE IF EXISTS
+				#ColumnsWithObsoleteDataTypes;
+
+			IF
+				CURSOR_STATUS ('local' , N'DatabasesCursor') != -3
+			BEGIN
+
+				CLOSE DatabasesCursor;
+
+				DEALLOCATE DatabasesCursor;
+
+			END;
 
 			BREAK;
 
