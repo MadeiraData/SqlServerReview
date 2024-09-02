@@ -19,12 +19,13 @@ $CheckFooterTemplate = [string](Get-Content -Path $CheckTemplateFooterFilePath -
 
 Get-ChildItem -Path $CheckScriptsFolderPath -Include $CheckScriptsFilter | ForEach-Object {
     $CheckId += 1
-    Write-Output "Check $CheckId : $($_.BaseName)"
+    $CheckTitle = $($_.BaseName)
+    Write-Output "Check $CheckId : $CheckTitle"
 
     $OutputScriptBuilder += $batchSeparator
-    $OutputScriptBuilder += $CheckHeaderTemplate.Replace('{CheckId}', $CheckId)
-    $OutputScriptBuilder += [string](Get-Content -Path $_.FullName -Raw).Replace('{CheckId}', $CheckId)
-    $OutputScriptBuilder += $CheckFooterTemplate.Replace('{CheckId}', $CheckId)
+    $OutputScriptBuilder += $CheckHeaderTemplate.Replace('{CheckId}', $CheckId).Replace('{CheckTitle}', $CheckTitle)
+    $OutputScriptBuilder += [string](Get-Content -Path $_.FullName -Raw).Replace('{CheckId}', $CheckId).Replace('{CheckTitle}', $CheckTitle)
+    $OutputScriptBuilder += $CheckFooterTemplate.Replace('{CheckId}', $CheckId).Replace('{CheckTitle}', $CheckTitle)
 }
 
 Write-Output "Finalizing output script: $OutputScriptFilePath"

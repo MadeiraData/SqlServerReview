@@ -105,7 +105,7 @@
 		)
 		SELECT
 			CheckId					= '{CheckId}' ,
-			Title					= N'Statistics are Never Updated' ,
+			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
 					WHEN @AdditionalInfo IS NULL

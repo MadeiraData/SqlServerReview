@@ -3,7 +3,7 @@ DECLARE
 	, @DeadlockRetry	AS BIT = 0
 
 
--- Check #{CheckId}
+-- Check #{CheckId} : {CheckTitle}
 
 WHILE
 	1 = 1

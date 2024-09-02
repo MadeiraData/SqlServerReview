@@ -117,5 +117,3 @@ FROM
 	sys.dm_os_host_info AS HostInfo
 CROSS JOIN
 	sys.dm_os_sys_info AS SystemInfo;
-
-GO

@@ -168,7 +168,7 @@
 		)
 		SELECT
 			CheckId					= '{CheckId}' ,
-			Title					= N'Heap Tables' ,
+			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
 					WHEN @AdditionalInfo IS NULL

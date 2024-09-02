@@ -30,7 +30,7 @@
 		)
 		SELECT
 			CheckId					= '{CheckId}' ,
-			Title					= N'Auto Create Statistics is Off' ,
+			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
 					WHEN @AdditionalInfo IS NULL

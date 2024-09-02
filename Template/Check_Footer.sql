@@ -15,7 +15,7 @@
 			IsDeadlockRetry
 		)
 		SELECT
-			CheckId			= @CheckId ,
+			CheckId			= '{CheckId}' ,
 			ErrorNumber		= ERROR_NUMBER () ,
 			ErrorMessage	= ERROR_MESSAGE () ,
 			ErrorSeverity	= ERROR_SEVERITY () ,
