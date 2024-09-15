@@ -1,3 +1,4 @@
+
 		SET @AdditionalInfo =
 			(
 				SELECT

@@ -1,7 +1,7 @@
+
 		DECLARE
-			@DatabaseName					AS SYSNAME ,
-			@AdditionalInfo					AS XML ,
-			@Command						AS NVARCHAR(MAX)
+			@DatabaseName	AS SYSNAME ,
+			@Command		AS NVARCHAR(MAX);
 
 		DROP TABLE IF EXISTS
 			#HeapTables;
@@ -167,7 +167,7 @@
 			AdditionalInfo
 		)
 		SELECT
-			CheckId					= '{CheckId}' ,
+			CheckId					= {CheckId} ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE

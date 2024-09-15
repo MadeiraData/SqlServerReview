@@ -1,3 +1,4 @@
+
 		DECLARE
 			@AdhocRatio					AS DECIMAL(3,2) ,
 			@OptimizeForAdhocWorkloads	AS BIT;
