@@ -1,7 +1,8 @@
 
 		DECLARE
-			@DatabaseName	AS SYSNAME ,
-			@Command		AS NVARCHAR(MAX);
+			@DatabaseName		AS SYSNAME ,
+			@Command			AS NVARCHAR(MAX) ,
+			@NumberOfColumns	AS INT;
 
 		DROP TABLE IF EXISTS
 			#ColumnsWithObsoleteDataTypes;
@@ -101,6 +102,11 @@
 
 		DEALLOCATE DatabasesCursor;
 
+		SELECT
+			@NumberOfColumns = COUNT (*)
+		FROM
+			#ColumnsWithObsoleteDataTypes;
+
 		SET @AdditionalInfo =
 			(
 				SELECT
@@ -153,9 +159,29 @@
 					ELSE
 						1
 				END ,
-			CurrentStateImpact		= 1 ,	-- Low
-			RecommendationEffort	= 2 ,	-- Medium
-			RecommendationRisk		= 2 ,	-- Medium
+			CurrentStateImpact		=
+				CASE
+					WHEN @NumberOfColumns = 0
+						THEN 0	-- None
+					ELSE
+						1	-- Low
+				END ,
+			RecommendationEffort	=
+				CASE
+					WHEN @NumberOfColumns = 0
+						THEN 0	-- None
+					WHEN @NumberOfColumns BETWEEN 1 AND 10
+						THEN 2	-- Medium
+					ELSE
+						3	-- High
+				END ,
+			RecommendationRisk		=
+				CASE
+					WHEN @NumberOfColumns = 0
+						THEN 0	-- None
+					ELSE
+						2	-- Medium
+				END ,
 			AdditionalInfo			= @AdditionalInfo;
 
 		DROP TABLE
