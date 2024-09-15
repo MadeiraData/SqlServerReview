@@ -27,20 +27,8 @@ GO
 
 
 DECLARE
-	--@CheckId						AS INT ,
-	--@AdditionalInfo					AS XML ,
-	--@DeadlockRetry					AS BIT ,
-	@DatabaseName					AS SYSNAME ,
-	@Command						AS NVARCHAR(MAX) ,
-	@InstanceCompatibilityLevel		AS TINYINT ,
-	--@AdhocRatio						AS DECIMAL(3,2) ,
-	--@OptimizeForAdhocWorkloads		AS BIT ,
 	@OperatingSystemArchitecture	AS NVARCHAR(4) ,
-	@SQLServerArchitecture			AS NVARCHAR(4) ,
-	@CurrentMaxMemorySetting_MB		AS INT ,
-	@MaxWorkerThreads				AS INT ,
-	@TotalPhysicalMemory_MB			AS INT ,
-	@RecommendedMaxMemorySetting_MB	AS INT;
+	@SQLServerArchitecture			AS NVARCHAR(4);
 
 DROP TABLE IF EXISTS
 	#Checks;
