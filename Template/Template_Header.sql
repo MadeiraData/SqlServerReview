@@ -2,11 +2,15 @@ USE
 	[master];
 GO
 
-GO
+
 :setvar ThresholdParam 10
 GO
+
+
 :on error exit
 GO
+
+
 /*
 Detect SQLCMD mode and disable script execution if SQLCMD mode is not supported.
 To re-enable the script after enabling SQLCMD mode, execute the following:
@@ -21,17 +25,16 @@ BEGIN
 END
 GO
 
--- Local variables and temporary tables
 
 DECLARE
-	@CheckId						AS INT ,
-	@AdditionalInfo					AS XML ,
-	@DeadlockRetry					AS BIT ,
+	--@CheckId						AS INT ,
+	--@AdditionalInfo					AS XML ,
+	--@DeadlockRetry					AS BIT ,
 	@DatabaseName					AS SYSNAME ,
 	@Command						AS NVARCHAR(MAX) ,
 	@InstanceCompatibilityLevel		AS TINYINT ,
-	@AdhocRatio						AS DECIMAL(3,2) ,
-	@OptimizeForAdhocWorkloads		AS BIT ,
+	--@AdhocRatio						AS DECIMAL(3,2) ,
+	--@OptimizeForAdhocWorkloads		AS BIT ,
 	@OperatingSystemArchitecture	AS NVARCHAR(4) ,
 	@SQLServerArchitecture			AS NVARCHAR(4) ,
 	@CurrentMaxMemorySetting_MB		AS INT ,

@@ -1,7 +1,3 @@
-
-		DECLARE
-			@AdditionalInfo					AS XML
-
 		SET @AdditionalInfo =
 			(
 				SELECT
@@ -29,7 +25,7 @@
 			AdditionalInfo
 		)
 		SELECT
-			CheckId					= '{CheckId}' ,
+			CheckId					= {CheckId} ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE

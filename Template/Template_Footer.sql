@@ -1,6 +1,7 @@
 GO
 SET NOEXEC OFF;
 
+
 -- View the results
 
 SELECT
