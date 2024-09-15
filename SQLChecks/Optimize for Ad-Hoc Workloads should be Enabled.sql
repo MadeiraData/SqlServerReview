@@ -15,12 +15,23 @@
 		WHERE
 			[name] = N'optimize for ad hoc workloads';
 
+		SET @AdditionalInfo =
+			(
+				SELECT
+					AdhocRatio		= @AdhocRatio ,
+					CurrentConfig	= @OptimizeForAdhocWorkloads
+				FOR XML
+					PATH (N'') ,
+					ROOT (N'OptimizeForAdhocWorkloads')
+			);
+
 		INSERT INTO
 			#Checks
 		(
 			CheckId ,
 			Title ,
 			RequiresAttention ,
+			WorstCaseImpact ,
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
@@ -31,12 +42,31 @@
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
-					WHEN @AdditionalInfo IS NULL
-						THEN 0
+					WHEN @AdhocRatio > 0.5 AND @OptimizeForAdhocWorkloads = 0
+						THEN 1
 					ELSE
-						1
+						0
 				END ,
-			CurrentStateImpact		= 1 ,	-- Low
-			RecommendationEffort	= 1 ,	-- Low
-			RecommendationRisk		= 1 ,	-- Low
+			WorstCaseImpact			= 1 ,	-- Low
+			CurrentStateImpact		=
+				CASE
+					WHEN @AdhocRatio > 0.5 AND @OptimizeForAdhocWorkloads = 0
+						THEN 1	-- Low
+					ELSE
+						0	-- None
+				END ,
+			RecommendationEffort	=
+				CASE
+					WHEN @AdhocRatio > 0.5 AND @OptimizeForAdhocWorkloads = 0
+						THEN 1	-- Low
+					ELSE
+						0	-- None
+				END ,
+			RecommendationRisk		=
+				CASE
+					WHEN @AdhocRatio > 0.5 AND @OptimizeForAdhocWorkloads = 0
+						THEN 1	-- Low
+					ELSE
+						0	-- None
+				END ,
 			AdditionalInfo			= @AdditionalInfo;

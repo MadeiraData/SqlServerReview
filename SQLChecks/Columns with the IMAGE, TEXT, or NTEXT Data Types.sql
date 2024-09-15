@@ -144,6 +144,7 @@
 			CheckId ,
 			Title ,
 			RequiresAttention ,
+			WorstCaseImpact ,
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
@@ -159,6 +160,7 @@
 					ELSE
 						1
 				END ,
+			WorstCaseImpact			= 1 ,	-- Low
 			CurrentStateImpact		=
 				CASE
 					WHEN @NumberOfColumns = 0

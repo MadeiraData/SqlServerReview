@@ -1,7 +1,8 @@
 
 		DECLARE
 			@DatabaseName	AS SYSNAME ,
-			@Command		AS NVARCHAR(MAX);
+			@Command		AS NVARCHAR(MAX) ,
+			@NumberOfTables	AS INT;
 
 		DROP TABLE IF EXISTS
 			#HeapTables;
@@ -127,6 +128,11 @@
 
 		DEALLOCATE DatabasesCursor;
 
+		SELECT
+			@NumberOfTables = COUNT (*)
+		FROM
+			#HeapTables;
+
 		SET @AdditionalInfo =
 			(
 				SELECT
@@ -161,6 +167,7 @@
 			CheckId ,
 			Title ,
 			RequiresAttention ,
+			WorstCaseImpact ,
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
@@ -176,9 +183,30 @@
 					ELSE
 						1
 				END ,
-			CurrentStateImpact		= 2 ,	-- Medium
-			RecommendationEffort	= 3 ,	-- High
-			RecommendationRisk		= 3 ,	-- High
+			WorstCaseImpact			= 2 ,	-- Medium
+			CurrentStateImpact		=
+				CASE
+					WHEN @NumberOfTables = 0
+						THEN 0	-- None
+					ELSE
+						2	-- Medium
+				END ,
+			RecommendationEffort	=
+				CASE
+					WHEN @NumberOfTables = 0
+						THEN 0	-- None
+					WHEN @NumberOfTables BETWEEN 1 AND 5
+						THEN 2	-- Medium
+					ELSE
+						3	-- High
+				END ,
+			RecommendationRisk		=
+				CASE
+					WHEN @NumberOfTables = 0
+						THEN 0	-- None
+					ELSE
+						3	-- High
+				END ,
 			AdditionalInfo			= @AdditionalInfo;
 
 		DROP TABLE

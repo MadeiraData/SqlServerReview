@@ -1,7 +1,8 @@
 
 		DECLARE
-			@DatabaseName	AS SYSNAME ,
-			@Command		AS NVARCHAR(MAX);
+			@DatabaseName		AS SYSNAME ,
+			@Command			AS NVARCHAR(MAX) ,
+			@NumberOfIndexes	AS INT;
 
 		DROP TABLE IF EXISTS
 			#FragmentedIndexes;
@@ -103,6 +104,12 @@
 
 		DEALLOCATE DatabasesCursor;
 
+		SELECT
+			@NumberOfIndexes = COUNT (*)
+		FROM
+			#FragmentedIndexes;
+
+
 		SET @AdditionalInfo =
 			(
 				SELECT
@@ -139,6 +146,7 @@
 			CheckId ,
 			Title ,
 			RequiresAttention ,
+			WorstCaseImpact ,
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
@@ -154,9 +162,30 @@
 					ELSE
 						1
 				END ,
-			CurrentStateImpact		= 2 ,	-- Medium
-			RecommendationEffort	= 1 ,	-- Low
-			RecommendationRisk		= 2 ,	-- Medium
+			WorstCaseImpact			= 2 ,	-- Medium
+			CurrentStateImpact		=
+				CASE
+					WHEN @NumberOfIndexes = 0
+						THEN 0	-- None
+					WHEN @NumberOfIndexes BETWEEN 1 AND 10
+						THEN 1	-- Low
+					ELSE
+						2	-- Medium
+				END ,
+			RecommendationEffort	=
+				CASE
+					WHEN @NumberOfIndexes = 0
+						THEN 0	-- None
+					ELSE
+						1	-- Low
+				END ,
+			RecommendationRisk		=
+				CASE
+					WHEN @NumberOfIndexes = 0
+						THEN 0	-- None
+					ELSE
+						2	-- Medium
+				END ,
 			AdditionalInfo			= @AdditionalInfo;
 
 		DROP TABLE

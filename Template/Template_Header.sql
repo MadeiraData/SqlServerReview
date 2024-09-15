@@ -39,6 +39,7 @@ CREATE TABLE
 	CheckId					INT				NOT NULL ,
 	Title					NVARCHAR(100)	NOT NULL ,
 	RequiresAttention		BIT				NOT NULL ,
+	WorstCaseImpact			TINYINT			NOT NULL ,
 	CurrentStateImpact		TINYINT			NOT NULL ,
 	RecommendationEffort	TINYINT			NOT NULL ,
 	RecommendationRisk		TINYINT			NOT NULL ,

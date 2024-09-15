@@ -74,6 +74,7 @@
 			CheckId ,
 			Title ,
 			RequiresAttention ,
+			WorstCaseImpact ,
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
@@ -89,9 +90,28 @@
 					ELSE
 						0
 				END ,
-			CurrentStateImpact		= 2 ,	-- Medium
-			RecommendationEffort	= 1 ,	-- Low
-			RecommendationRisk		= 1 ,	-- Low
+			WorstCaseImpact			= 2 ,	-- Medium
+			CurrentStateImpact		=
+				CASE
+					WHEN @CurrentMaxMemorySetting_MB > @RecommendedMaxMemorySetting_MB
+						THEN 2	-- Medium
+					ELSE
+						0	-- None
+				END ,
+			RecommendationEffort	=
+				CASE
+					WHEN @CurrentMaxMemorySetting_MB > @RecommendedMaxMemorySetting_MB
+						THEN 1	-- Low
+					ELSE
+						0	-- None
+				END ,
+			RecommendationRisk		=
+				CASE
+					WHEN @CurrentMaxMemorySetting_MB > @RecommendedMaxMemorySetting_MB
+						THEN 1	-- Low
+					ELSE
+						0	-- None
+				END ,
 			AdditionalInfo			= @AdditionalInfo;
 
 		BREAK;

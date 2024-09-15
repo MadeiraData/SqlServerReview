@@ -20,6 +20,7 @@
 			CheckId ,
 			Title ,
 			RequiresAttention ,
+			WorstCaseImpact ,
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
@@ -35,7 +36,26 @@
 					ELSE
 						1
 				END ,
-			CurrentStateImpact		= 3 ,	-- High
-			RecommendationEffort	= 1 ,	-- Low
-			RecommendationRisk		= 1 ,	-- Low
+			WorstCaseImpact			= 3 ,	-- High
+			CurrentStateImpact		=
+				CASE
+					WHEN @AdditionalInfo IS NULL
+						THEN 0	-- None
+					ELSE
+						3	-- High
+				END ,
+			RecommendationEffort	=
+				CASE
+					WHEN @AdditionalInfo IS NULL
+						THEN 0	-- None
+					ELSE
+						1	-- Low
+				END ,
+			RecommendationRisk		=
+				CASE
+					WHEN @AdditionalInfo IS NULL
+						THEN 0	-- None
+					ELSE
+						1	-- Low
+				END ,
 			AdditionalInfo			= @AdditionalInfo;
