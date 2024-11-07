@@ -11,21 +11,6 @@ GO
 GO
 
 
-/*
-Detect SQLCMD mode and disable script execution if SQLCMD mode is not supported.
-To re-enable the script after enabling SQLCMD mode, execute the following:
-SET NOEXEC OFF; 
-*/
-:setvar __IsSqlCmdEnabled "True"
-GO
-IF N'$(__IsSqlCmdEnabled)' NOT LIKE N'True'
-BEGIN
-    PRINT N'SQLCMD mode must be enabled to successfully execute this script.';
-    SET NOEXEC ON;
-END
-GO
-
-
 DECLARE
 	@OperatingSystemArchitecture	AS NVARCHAR(4) ,
 	@SQLServerArchitecture			AS NVARCHAR(4);

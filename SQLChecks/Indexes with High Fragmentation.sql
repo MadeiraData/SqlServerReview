@@ -29,7 +29,11 @@
 				SELECT
 					DatabaseName = [name]
 				FROM
-					sys.databases;
+					sys.databases
+				WHERE
+					database_id NOT IN (2,3)	-- Not tempdb and model
+				AND
+					[state] = 0;	-- Online
 
 		END
 		ELSE

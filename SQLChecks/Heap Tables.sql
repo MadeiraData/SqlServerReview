@@ -37,7 +37,9 @@
 			FROM
 				sys.databases
 			WHERE
-				database_id != 2;	-- tempdb
+				database_id > 4	-- Only User Databases
+			AND
+				[state] = 0;	-- Online
 
 		OPEN DatabasesCursor;
 
