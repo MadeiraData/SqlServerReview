@@ -50,7 +50,7 @@
 							CROSS APPLY
 								sys.dm_db_stats_properties (Stats.[object_id] , Stats.stats_id) AS StatsProperties
 							WHERE
-								StatsProperties.last_updated > DATEADD (MONTH , -1 , SYSDATETIME ());
+								StatsProperties.last_updated > DATEADD (MONTH , -1 , SYSDATETIME ())
 						)
 					BEGIN
 
