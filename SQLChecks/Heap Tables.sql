@@ -1,18 +1,45 @@
+/*
+	DESCRIPTION:
+		If a table is a heap and does not have any nonclustered indexes, then the entire table must be examined (a table scan) to find any row. This can be acceptable when the table is tiny, such as a list of the 12 regional offices of a company.
+		When a table is stored as a heap, individual rows are identified by reference to a row identifier (RID) consisting of the file number, data page number, and slot on the page. The row id is a small and efficient structure. Sometimes data architects use heaps when data is always accessed through nonclustered indexes and the RID is smaller than a clustered index key.
+		Heap tables can have detrimental implications on performance in the following scenarios:
+		·When the data is frequently returned in a sorted order. A clustered index on the sorting column could avoid the sorting operation.
+		·When the data is frequently grouped together. Data must be sorted before it is grouped, and a clustered index on the sorting column could avoid the sorting operation.
+		·When ranges of data are frequently queried from the table. A clustered index on the range column will avoid sorting the entire heap.
+		·When there are no nonclustered indexes and the table is large. In a heap, all rows of the heap must be read to find any row.
+		There are cases where heaps perform better than tables with clustered indexes.  For example, if you’ve got a staging table where data is inserted and then selected back out (without doing any updates whatsoever) then heaps may be faster.  However, unless you’ve tested and proven that a heap is the right answer for your issue, it’s probably not.
+		To resolve this issue, we’ll need to:
+		·List the heaps (tables with no clustered indexes)
+		·If they’re not actively being queried (like if the seeks, scans, updates are null), then they might be leftover backup tables.
+		·If they’re being actively queried, determine the right clustering index.  Sometimes there’s already a primary key, but someone just forgot to set it as the clustered index.
+		 
+		You can use this script to generate "guestimated" clustered index recommendations for all heap tables in the instance.
+		 
+		More info:
+		·(Eitan Blumin) Script to generate "guestimated" clustered index recommendations
+		·(Microsoft Docs) Heaps (Tables Without Clustered Indexes)
+		·(MSSQL Tips) SQL Server Clustered Tables vs Heap Tables
+		·(Brent Ozar) Tables Without Clustered Indexes
+		·(Paul S. Randal) Indexing Strategies for SQL Server Performance
 
+*/
 		DECLARE
 			@DatabaseName	AS SYSNAME ,
 			@Command		AS NVARCHAR(MAX) ,
 			@NumberOfTables	AS INT;
 
-		DROP TABLE IF EXISTS
-			#HeapTables;
+		IF OBJECT_ID('tempdb.dbo.#HeapTables', 'U') IS NOT NULL
+		BEGIN
+			DROP TABLE #HeapTables;
+		END
 
 		CREATE TABLE
 			#HeapTables
 		(
 			DatabaseName	SYSNAME	NOT NULL ,
 			SchemaName		SYSNAME	NOT NULL ,
-			TableName		SYSNAME	NOT NULL
+			TableName		SYSNAME	NOT NULL ,
+			[RowCount]		BIGINT
 		);
 
 		DROP TABLE IF EXISTS
@@ -35,11 +62,13 @@
 			SELECT
 				DatabaseName = [name]
 			FROM
-				sys.databases
+				#sys_databases
 			WHERE
-				database_id > 4	-- Only User Databases
+				database_id > 4				-- Only User Databases
 			AND
-				[state] = 0;	-- Online
+				[state] = 0					-- Online
+			AND
+				source_database_id IS NULL;	-- Not a database snapshots
 
 		OPEN DatabasesCursor;
 
@@ -62,20 +91,31 @@
 					(
 						DatabaseName ,
 						SchemaName ,
-						TableName
+						TableName ,
+						[RowCount]
 					)
 					SELECT
 						DatabaseName	= DB_NAME () ,
 						SchemaName		= SCHEMA_NAME (Tables.schema_id) ,
-						TableName		= Tables.name
+						TableName		= Tables.name ,
+						[RowCount]		= SUM(partition_stats.row_count)
 					FROM
 						sys.tables AS Tables
 					INNER JOIN
 						sys.indexes AS Indexes
 					ON
 						Tables.object_id = Indexes.object_id
+					INNER JOIN sys.dm_db_partition_stats AS partition_stats
+					ON	
+						Indexes.object_id = partition_stats.object_id
+						AND Indexes.index_id = partition_stats.index_id
 					WHERE
-						Indexes.index_id = 0;
+						Indexes.index_id = 0
+					GROUP BY
+						Tables.schema_id ,
+						Tables.name
+					HAVING
+						SUM(partition_stats.row_count) > 200000;
 
 					INSERT INTO
 						#DatabaseRowSizes
@@ -140,7 +180,8 @@
 				SELECT
 					DatabaseName	= [Database].DatabaseName ,
 					SchemaName		= HeapTable.SchemaName ,
-					TableName		= HeapTable.TableName
+					TableName		= HeapTable.TableName ,
+					[Rows]			= [RowCount]
 				FROM
 					(
 						SELECT DISTINCT
@@ -157,7 +198,8 @@
 				ORDER BY
 					DatabaseName	ASC ,
 					SchemaName		ASC ,
-					TableName		ASC
+					TableName		ASC ,
+					[RowCount]
 				FOR XML
 					AUTO ,
 					ROOT (N'HeapTables')

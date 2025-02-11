@@ -1,4 +1,18 @@
 
+/*
+	DESCRIPTION:
+		DB Configuration: Auto update stats is disabled.
+		This may cause poor query performance due to suboptimal query plans.
+		Auto-update statistics should be enabled.
+		 
+		Remediation command:
+		ALTER DATABASE CURRENT SET AUTO_UPDATE_STATISTICS ON;
+		 
+		More info:
+		https://docs.microsoft.com/sql/relational-databases/statistics/statistics
+		 
+
+*/
 		SET @AdditionalInfo =
 			(
 				SELECT
@@ -6,7 +20,9 @@
 				FROM
 					sys.databases
 				WHERE
-					is_auto_create_stats_on = 0
+					is_auto_update_stats_on = 0
+				AND
+					source_database_id IS NULL		-- Not a database snapshots
 				ORDER BY
 					database_id ASC
 				FOR XML

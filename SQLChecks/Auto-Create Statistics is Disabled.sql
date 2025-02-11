@@ -1,12 +1,18 @@
 
 /*
 	DESCRIPTION:
-		When set to ON, the database is shut down cleanly and its resources are freed after the last user exits. 
-		The database automatically reopens when a user tries to use the database again.
-		When set to OFF, the database remains open after the last user exits. quering sys.databases.is_auto_close
+		DB Configuration: Auto create stats is disabled.
+		This may cause poor query performance due to suboptimal query plans.
+		Auto-create statistics should be enabled.
+		 
+		Remediation command:
+		ALTER DATABASE CURRENT SET AUTO_CREATE_STATISTICS ON;
+		 
+		More info:
+		https://docs.microsoft.com/sql/relational-databases/statistics/statistics
+
 
 */
-
 		SET @AdditionalInfo =
 			(
 				SELECT
@@ -14,9 +20,9 @@
 				FROM
 					#sys_databases
 				WHERE
-					is_auto_close_on = 1
+					is_auto_create_stats_on = 0
 				AND
-					source_database_id IS NULL	-- Not a database snapshots
+					source_database_id IS NULL		-- Not a database snapshots
 				ORDER BY
 					database_id ASC
 				FOR XML
@@ -46,27 +52,26 @@
 					ELSE
 						1
 				END ,
-			WorstCaseImpact			= 1 ,	-- Low
+			WorstCaseImpact			= 3 ,	-- High
 			CurrentStateImpact		=
 				CASE
 					WHEN @AdditionalInfo IS NULL
-						THEN 0
+						THEN 0	-- None
 					ELSE
-						1	-- Low
+						3	-- High
 				END ,
 			RecommendationEffort	=
 				CASE
 					WHEN @AdditionalInfo IS NULL
-						THEN 0
+						THEN 0	-- None
 					ELSE
 						1	-- Low
 				END ,
 			RecommendationRisk		=
 				CASE
 					WHEN @AdditionalInfo IS NULL
-						THEN 0
+						THEN 0	-- None
 					ELSE
 						1	-- Low
 				END ,
 			AdditionalInfo			= @AdditionalInfo;
-

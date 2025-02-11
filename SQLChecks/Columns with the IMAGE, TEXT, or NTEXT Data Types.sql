@@ -1,11 +1,20 @@
 
+/*
+	DESCRIPTION:
+		text, ntext, and image - These data types are deprecated data types that were replaced by the (max) data types (see above)for varchar and nvarchar. 
+		You should absolutely never be using them. They were made obsolete in SQL 2005.
+		Managing a legacy application? These data types must be upgraded as there is a major index maintenance feature called 'online' that cannot be performed on them. 
+*/
+
 		DECLARE
 			@DatabaseName		AS SYSNAME ,
 			@Command			AS NVARCHAR(MAX) ,
 			@NumberOfColumns	AS INT;
 
-		DROP TABLE IF EXISTS
-			#ColumnsWithObsoleteDataTypes;
+		IF OBJECT_ID('tempdb.dbo.#ColumnsWithObsoleteDataTypes', 'U') IS NOT NULL
+		BEGIN
+			DROP TABLE #ColumnsWithObsoleteDataTypes;
+		END
 
 		CREATE TABLE
 			#ColumnsWithObsoleteDataTypes
@@ -30,9 +39,11 @@
 				SELECT
 					DatabaseName = [name]
 				FROM
-					sys.databases
+					#sys_databases
 				WHERE
-					database_id > 4;	-- Only User Databases
+					database_id > 4				-- Only User Databases
+				AND
+					source_database_id IS NULL;	-- Not a database snapshots
 
 		END
 		ELSE
@@ -188,5 +199,3 @@
 
 		DROP TABLE
 			#ColumnsWithObsoleteDataTypes;
-
-		BREAK;

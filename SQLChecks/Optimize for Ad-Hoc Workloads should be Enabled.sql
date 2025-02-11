@@ -1,4 +1,20 @@
 
+/*
+	DESCRIPTION:
+		The optimize for ad hoc workloads option is used to improve the efficiency of the plan cache for workloads that contain many single use ad hoc batches. 
+		When this option is set to 1, the Database Engine stores a small compiled plan stub in the plan cache when a batch is compiled for the first time, instead of the full compiled plan. 
+		This helps to relieve memory pressure by not allowing the plan cache to become filled with compiled plans that are not reused.
+		
+		The compiled plan stub allows the Database Engine to recognize that this ad hoc batch has been compiled before but has only stored a compiled plan stub.
+		When this batch is invoked (compiled or executed) again, the Database Engine compiles the batch, removes the compiled plan stub from the plan cache, and adds the full compiled plan to the plan cache.
+
+		If the number of single-use plans take a significant portion of SQL Server Database Engine memory in an OLTP server, 
+		and these plans are Ad-hoc plans, use this server option to decrease memory usage with these objects.
+		
+		https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/optimize-for-ad-hoc-workloads-server-configuration-option?view=sql-server-2017
+
+*/
+
 		DECLARE
 			@AdhocRatio					AS DECIMAL(3,2) ,
 			@OptimizeForAdhocWorkloads	AS BIT;

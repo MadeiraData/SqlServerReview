@@ -1,11 +1,29 @@
 
+/*
+	DESCRIPTION:
+		High index fragmentation occurs when the logical order of index pages doesn’t match their physical order, leading to inefficient data retrieval and slower query performance.
+		Frequent insert, update, and delete operations cause pages to split and data to scatter, resulting in fragmentation.
+
+		Impact: Increased I/O operations and longer query execution times.
+		Detection: Use sys.dm_db_index_physical_stats to identify fragmented indexes.
+		Maintenance: Reorganize or rebuild indexes based on fragmentation level.
+		
+		https://www.sqlshack.com/how-to-identify-and-resolve-sql-server-index-fragmentation/
+		https://learn.microsoft.com/en-us/sql/relational-databases/indexes/reorganize-and-rebuild-indexes?view=sql-server-ver16
+		https://www.mssqltips.com/sqlservertip/4331/sql-server-index-fragmentation-overview/
+
+*/
+
 		DECLARE
 			@DatabaseName		AS SYSNAME ,
 			@Command			AS NVARCHAR(MAX) ,
 			@NumberOfIndexes	AS INT;
 
-		DROP TABLE IF EXISTS
-			#FragmentedIndexes;
+		IF OBJECT_ID('tempdb.dbo.#FragmentedIndexes', 'U') IS NOT NULL
+		BEGIN
+			DROP TABLE #FragmentedIndexes;
+		END
+
 
 		CREATE TABLE
 			#FragmentedIndexes
@@ -29,11 +47,13 @@
 				SELECT
 					DatabaseName = [name]
 				FROM
-					sys.databases
+					#sys_databases
 				WHERE
 					database_id NOT IN (2,3)	-- Not tempdb and model
 				AND
-					[state] = 0;	-- Online
+					[state] = 0					-- Online
+				AND
+					source_database_id IS NULL;	-- Not a database snapshots
 
 		END
 		ELSE
@@ -79,7 +99,9 @@
 					ON
 						Tables.object_id = Indexes.object_id
 					WHERE
-						Indexes.is_disabled = 0
+						Indexes.is_disabled = 0		-- Disabled indexes
+						AND
+						Indexes.type <> 0			-- Exclude heap tables
 					AND
 						EXISTS
 							(

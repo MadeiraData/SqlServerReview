@@ -1,7 +1,7 @@
 
 /*
 	DESCRIPTION:
-		SQL Max Memory setting configured too high. 
+		SQL Max Memory setting configured too low. 
 		Based on BP, configured percentage of total system memory, and/or minimum free memory GB left for OS.
 
 */
@@ -69,7 +69,7 @@
 			(
 				SELECT
 					[Current]	= @CurrentMaxMemorySetting_MB ,
-					Recommended	= @RecommendedMaxMemorySetting_MB
+					RecommendedRange	= CONCAT('Between ', CAST(@RecommendedMaxMemorySetting_MB * 80 / 100 AS INT), ' and ', @RecommendedMaxMemorySetting_MB)
 				FOR XML
 					PATH (N'') ,
 					ROOT (N'MaxMemoryConfiguration')
@@ -92,7 +92,7 @@
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
-					WHEN @CurrentMaxMemorySetting_MB > @RecommendedMaxMemorySetting_MB
+					WHEN @CurrentMaxMemorySetting_MB < CAST(@RecommendedMaxMemorySetting_MB * 80 / 100 AS INT)
 						THEN 1
 					ELSE
 						0
@@ -100,21 +100,21 @@
 			WorstCaseImpact			= 2 ,	-- Medium
 			CurrentStateImpact		=
 				CASE
-					WHEN @CurrentMaxMemorySetting_MB > @RecommendedMaxMemorySetting_MB
+					WHEN @CurrentMaxMemorySetting_MB < CAST(@RecommendedMaxMemorySetting_MB * 80 / 100 AS INT)
 						THEN 2	-- Medium
 					ELSE
 						0	-- None
 				END ,
 			RecommendationEffort	=
 				CASE
-					WHEN @CurrentMaxMemorySetting_MB > @RecommendedMaxMemorySetting_MB
+					WHEN @CurrentMaxMemorySetting_MB < CAST(@RecommendedMaxMemorySetting_MB * 80 / 100 AS INT)
 						THEN 1	-- Low
 					ELSE
 						0	-- None
 				END ,
 			RecommendationRisk		=
 				CASE
-					WHEN @CurrentMaxMemorySetting_MB > @RecommendedMaxMemorySetting_MB
+					WHEN @CurrentMaxMemorySetting_MB < CAST(@RecommendedMaxMemorySetting_MB * 80 / 100 AS INT)
 						THEN 1	-- Low
 					ELSE
 						0	-- None

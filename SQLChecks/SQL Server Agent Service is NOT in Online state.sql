@@ -1,27 +1,25 @@
-
 /*
 	DESCRIPTION:
-		When set to ON, the database is shut down cleanly and its resources are freed after the last user exits. 
-		The database automatically reopens when a user tries to use the database again.
-		When set to OFF, the database remains open after the last user exits. quering sys.databases.is_auto_close
-
+		Indicates that the SQL Agent service is offline.
+			
+		This check is ignored for Express editions.
+		
 */
 
 		SET @AdditionalInfo =
 			(
 				SELECT
-					DatabaseName = [name]
+					servicename		AS [Name],
+					status_desc		AS [status]
 				FROM
-					#sys_databases
+					sys.dm_server_services
 				WHERE
-					is_auto_close_on = 1
-				AND
-					source_database_id IS NULL	-- Not a database snapshots
-				ORDER BY
-					database_id ASC
+					servicename LIKE 'SQL Server Agent%'
+					AND [status] != 4		--- Running
+					AND CONVERT(int, SERVERPROPERTY('EngineEdition')) <> 4
 				FOR XML
 					PATH (N'') ,
-					ROOT (N'Databases')
+					ROOT (N'Services')
 			);
 
 		INSERT INTO
@@ -46,20 +44,20 @@
 					ELSE
 						1
 				END ,
-			WorstCaseImpact			= 1 ,	-- Low
+			WorstCaseImpact			= 3 ,	-- High
 			CurrentStateImpact		=
 				CASE
 					WHEN @AdditionalInfo IS NULL
 						THEN 0
 					ELSE
-						1	-- Low
+						1	-- High
 				END ,
 			RecommendationEffort	=
 				CASE
 					WHEN @AdditionalInfo IS NULL
 						THEN 0
 					ELSE
-						1	-- Low
+						1	-- High
 				END ,
 			RecommendationRisk		=
 				CASE

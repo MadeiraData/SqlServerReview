@@ -1,10 +1,25 @@
 
+/*
+	DESCRIPTION:
+		This condition alerts about very old table statistics with a high number of rows that were changed since the last statistics update.
+		If such are found, then you should probably optimize the index and statistics maintenance jobs.
+		 
+		Outdated statistics may severely impact performance due to inaccurate row estimations in execution plans.
+		 
+		See also
+		https://www.madeiradata.com/post/the-most-important-performance-factor-in-sql-server
+		https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-stats-properties-transact-sql
+
+*/
+
 		DECLARE
 			@DatabaseName	AS SYSNAME ,
 			@Command		AS NVARCHAR(MAX);
 
-		DROP TABLE IF EXISTS
-			#Databases;
+		IF OBJECT_ID('tempdb.dbo.#Databases', 'U') IS NOT NULL
+		BEGIN
+			DROP TABLE #Databases;
+		END
 
 		CREATE TABLE
 			#Databases
@@ -21,9 +36,11 @@
 			SELECT
 				DatabaseName = [name]
 			FROM
-				sys.databases
+				#sys_databases
 			WHERE
-				is_auto_update_stats_on = 0;
+				is_auto_update_stats_on = 0
+			AND
+				source_database_id IS NULL;	-- Not a database snapshots
 
 		OPEN DatabasesCursor;
 

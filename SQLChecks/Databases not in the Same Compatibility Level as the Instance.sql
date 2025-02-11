@@ -1,25 +1,39 @@
 
+/*
+
+	DESCRIPTION:
+		This condition evaluates to True when a database has a compatibility level that does not match that of the Master database (current compatibility level).
+		Compatibility mode allows an older database to run on a newer version of SQL Server at the expense of not being able to run newer features.  
+		While some databases need to use an older compatibility mode, not all of them do.
+		If there are databases, which must run in compatibility mode, please make provisions to exclude them in order to reduce false positive values.
+ 
+
+*/
 		DECLARE
 			@InstanceCompatibilityLevel	AS TINYINT ,
 			@NumberOfDatabases			AS INT;
 
-		SET @InstanceCompatibilityLevel = CAST (LEFT (CAST (SERVERPROPERTY ('ProductVersion') AS NVARCHAR(128)) , CHARINDEX (N'.' , CAST (SERVERPROPERTY ('ProductVersion') AS NVARCHAR(128))) - 1) AS TINYINT) * 10;
+		SET @InstanceCompatibilityLevel = CAST (LEFT (CAST(SERVERPROPERTY('ProductVersion') AS NVARCHAR(128)) , CHARINDEX (N'.' , CAST(SERVERPROPERTY('ProductVersion') AS NVARCHAR(128))) - 1) AS TINYINT) * 10;
 
 		SELECT
 			@NumberOfDatabases = COUNT (*)
 		FROM
-			sys.databases
+			#sys_databases
 		WHERE
-			[compatibility_level] != @InstanceCompatibilityLevel;
+			[compatibility_level] != @InstanceCompatibilityLevel
+		AND
+			source_database_id IS NULL;	-- Not a database snapshots
 
 		SET @AdditionalInfo =
 			(
 				SELECT
 					DatabaseName = [name]
 				FROM
-					sys.databases
+					#sys_databases
 				WHERE
 					[compatibility_level] != @InstanceCompatibilityLevel
+				AND
+					source_database_id IS NULL	-- Not a database snapshots
 				ORDER BY
 					database_id ASC
 				FOR XML
