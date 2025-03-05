@@ -85,4 +85,10 @@
 					ELSE
 						0	-- None
 				END ,
-			AdditionalInfo			= @AdditionalInfo;
+			AdditionalInfo			= 
+				CASE
+					WHEN @AdhocRatio > 0.5 AND @OptimizeForAdhocWorkloads = 0
+						THEN @AdditionalInfo
+					ELSE
+						NULL
+				END;

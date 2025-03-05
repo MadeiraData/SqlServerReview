@@ -119,4 +119,9 @@
 					ELSE
 						0	-- None
 				END ,
-			AdditionalInfo			= @AdditionalInfo;
+			AdditionalInfo			=
+				CASE
+					WHEN @CurrentMaxMemorySetting_MB < CAST(@RecommendedMaxMemorySetting_MB * 80 / 100 AS INT)
+						THEN @AdditionalInfo
+					ELSE NULL
+				END ;

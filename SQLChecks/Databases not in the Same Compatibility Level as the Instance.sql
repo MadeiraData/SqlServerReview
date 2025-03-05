@@ -27,7 +27,8 @@
 		SET @AdditionalInfo =
 			(
 				SELECT
-					DatabaseName = [name]
+					DatabaseName = [name],
+					[compatibility_level]
 				FROM
 					#sys_databases
 				WHERE

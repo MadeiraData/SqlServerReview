@@ -21,7 +21,7 @@ FROM
 	sys.master_files
 WHERE
 	database_id = 2
-	AND type_desc <> 'LOG';
+	AND [type_desc] != 'LOG';
 
 SET @AdditionalInfo =
 	(

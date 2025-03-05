@@ -89,3 +89,8 @@ CLOSE DatabasesCursor;
 
 DEALLOCATE DatabasesCursor;
 GO
+
+EXEC sys.sp_configure N'show advanced options', N'1';
+GO
+RECONFIGURE
+GO

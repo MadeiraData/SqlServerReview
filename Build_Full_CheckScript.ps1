@@ -14,14 +14,14 @@ Set-ExecutionPolicy bypass -Scope Process -force
 # Execute SQL_Server_Build_Check_Script_Creation.ps1 and wait for it to finish
 Write-Host "Execute SQL_Server_Build_Check_Script_Creation.ps1 and wait for it to finish"
 & .\SQL_Server_Build_Check_Script_Creation.ps1
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 10
 Write-Host "SQL_Server_Build_Check_Script_Creation script has finished
 "
 
 # Execute SQL_Server_Major_Version_Out_of_Support_Script_Creation.ps1 and wait for it to finish
 Write-Host "Execute SQL_Server_Major_Version_Out_of_Support_Script_Creation.ps1 and wait for it to finish"
 & .\SQL_Server_Major_Version_Out_of_Support_Script_Creation.ps1
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 10
 Write-Host "SQL_Server_Major_Version_Out_of_Support_Script_Creation.ps1
 "
 
