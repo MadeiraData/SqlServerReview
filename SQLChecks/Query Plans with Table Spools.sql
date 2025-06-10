@@ -23,28 +23,46 @@
 
 		SET @AdditionalInfo = NULL;
 
-		WITH
-			XMLNAMESPACES (DEFAULT N'http://schemas.microsoft.com/sqlserver/2004/07/showplan')
-		SELECT
-			@AdditionalInfo = N'Found Query Plans with Table Spools'
-		FROM
-			sys.dm_exec_cached_plans AS CachedPlans
-		CROSS APPLY
-			sys.dm_exec_query_plan (CachedPlans.[plan_handle]) AS QueryPlans
-		WHERE
-		(
-			QueryPlans.query_plan.query('.').exist('data(//RelOp[@PhysicalOp="Table Spool"][1])') = 1
-		)
-		AND
-			QueryPlans.query_plan.query('.').exist('data(//Object[@Schema!="[sys]"][1])') = 1;
+		--WITH
+		--	XMLNAMESPACES (DEFAULT N'http://schemas.microsoft.com/sqlserver/2004/07/showplan')
+		--SELECT
+		--	@AdditionalInfo = N'Found Query Plans with Table Spools'
+		--FROM
+		--	sys.dm_exec_cached_plans AS CachedPlans
+		--CROSS APPLY
+		--	sys.dm_exec_query_plan (CachedPlans.[plan_handle]) AS QueryPlans
+		--WHERE
+		--(
+		--	QueryPlans.query_plan.query('.').exist('data(//RelOp[@PhysicalOp="Table Spool"][1])') = 1
+		--)
+		--AND
+		--	QueryPlans.query_plan.query('.').exist('data(//Object[@Schema!="[sys]"][1])') = 1;
 
-		SET @NumberOfPlans = @@ROWCOUNT;
+		--SET @NumberOfPlans = @@ROWCOUNT;
+
+		--SET @AdditionalInfo = 
+		--					(
+		--						SELECT
+		--							@AdditionalInfo		AS AdditionalInfo,
+		--							@NumberOfPlans		AS NumberOfPlans
+		--						WHERE
+		--							@NumberOfPlans > 0
+		--						FOR XML
+		--							PATH (N'') ,
+		--							ROOT (N'QueryPlanswithTableSpool')
+		--					);
+
+		SELECT @NumberOfPlans = COUNT(*)
+		FROM
+			#Plans2Check AS p
+		WHERE
+			TableSpool = 1;
 
 		SET @AdditionalInfo = 
 							(
 								SELECT
-									@AdditionalInfo		AS AdditionalInfo,
-									@NumberOfPlans		AS NumberOfPlans
+									N'Query Plans with Table Spools'	AS AdditionalInfo,
+									@NumberOfPlans						AS NumberOfPlans
 								WHERE
 									@NumberOfPlans > 0
 								FOR XML
@@ -62,10 +80,11 @@
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
-			AdditionalInfo
+			AdditionalInfo,
+			[Responsible DBA Team]
 		)
 		SELECT
-			CheckId					= {CheckId} ,
+			CheckId					= @CheckId ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
@@ -104,4 +123,5 @@
 					ELSE
 						2	-- Medium
 				END ,
-			AdditionalInfo			= @AdditionalInfo;
+			AdditionalInfo			= @AdditionalInfo,
+			[Responsible DBA Team]					= N'Development';

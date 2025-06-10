@@ -41,9 +41,9 @@
 				FROM
 					#sys_databases
 				WHERE
-					database_id > 4				-- Only User Databases
-				AND
-					source_database_id IS NULL;	-- Not a database snapshots
+					database_id > 4					-- Only User Databases
+					AND HAS_DBACCESS([name]) = 1
+					AND source_database_id IS NULL;	-- Not a database snapshots
 
 		END
 		ELSE
@@ -159,10 +159,11 @@
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
-			AdditionalInfo
+			AdditionalInfo,
+			[Responsible DBA Team]
 		)
 		SELECT
-			CheckId					= {CheckId} ,
+			CheckId					= @CheckId ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
@@ -195,7 +196,8 @@
 					ELSE
 						2	-- Medium
 				END ,
-			AdditionalInfo			= @AdditionalInfo;
+			AdditionalInfo			= @AdditionalInfo,
+			[Responsible DBA Team]					= N'Development';
 
 		DROP TABLE
 			#ColumnsWithObsoleteDataTypes;

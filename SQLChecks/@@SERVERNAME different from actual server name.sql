@@ -54,10 +54,11 @@
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
-			AdditionalInfo
+			AdditionalInfo,
+			[Responsible DBA Team]
 		)
 		SELECT
-			CheckId					= {CheckId} ,
+			CheckId					= @CheckId ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
@@ -88,5 +89,6 @@
 					ELSE
 						1	-- Low
 				END ,
-			AdditionalInfo			= @AdditionalInfo;
+			AdditionalInfo			= @AdditionalInfo,
+			[Responsible DBA Team]					= N'Production';
 

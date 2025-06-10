@@ -16,16 +16,12 @@
 			@DatabaseName	AS SYSNAME ,
 			@Command		AS NVARCHAR(MAX);
 
-		IF OBJECT_ID('tempdb.dbo.#Databases', 'U') IS NOT NULL
+		IF OBJECT_ID('tempdb.dbo.#StatCheckDBs', 'U') IS NOT NULL
 		BEGIN
-			DROP TABLE #Databases;
+			DROP TABLE #StatCheckDBs;
 		END
 
-		CREATE TABLE
-			#Databases
-		(
-			DatabaseName SYSNAME NOT NULL
-		);
+		CREATE TABLE #StatCheckDBs (DatabaseName	NVARCHAR(128));
 
 		DECLARE
 			DatabasesCursor
@@ -34,7 +30,7 @@
 			FAST_FORWARD
 		FOR
 			SELECT
-				DatabaseName = [name]
+				[name]
 			FROM
 				#sys_databases
 			WHERE
@@ -72,7 +68,7 @@
 					BEGIN
 
 						INSERT INTO
-							#Databases
+							#StatCheckDBs
 						(
 							DatabaseName
 						)
@@ -101,7 +97,7 @@
 				SELECT
 					DatabaseName = Databases.DatabaseName
 				FROM
-					#Databases AS Databases
+					#StatCheckDBs AS Databases
 				ORDER BY
 					DatabaseName ASC
 				FOR XML
@@ -119,10 +115,11 @@
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
-			AdditionalInfo
+			AdditionalInfo,
+			[Responsible DBA Team]
 		)
 		SELECT
-			CheckId					= {CheckId} ,
+			CheckId					= @CheckId ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
@@ -153,7 +150,5 @@
 					ELSE
 						1	-- Low
 				END ,
-			AdditionalInfo			= @AdditionalInfo;
-
-		DROP TABLE
-			#Databases;
+			AdditionalInfo			= @AdditionalInfo,
+			[Responsible DBA Team]					= 'Production';

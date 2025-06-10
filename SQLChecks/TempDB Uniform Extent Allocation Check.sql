@@ -20,7 +20,7 @@ SELECT @TF1118Enabled =
 SELECT 
 	@MixedPage = is_mixed_page_allocation_on 
 FROM
-	sys.databases 
+	#sys_databases 
 WHERE
 	database_id = 2;
 
@@ -55,10 +55,11 @@ INSERT INTO #Checks
     CurrentStateImpact,
     RecommendationEffort,
     RecommendationRisk,
-    AdditionalInfo
+    AdditionalInfo,
+	[Responsible DBA Team]
 )
 SELECT
-    CheckId                 = {CheckId},
+    CheckId                 = @CheckId,
     Title                   = N'{CheckTitle}',
     RequiresAttention       = 
 								CASE 
@@ -80,4 +81,6 @@ SELECT
 									WHEN (@ProductVersion >= 13 AND @MixedPage = 1)
 											OR (@ProductVersion < 13 AND @TF1118Enabled = 0) THEN @AdditionalInfo
 									ELSE NULL
-								END;
+								END,
+	[Responsible DBA Team]					= 'Production';
+

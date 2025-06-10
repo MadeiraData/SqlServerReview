@@ -176,10 +176,11 @@
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
-			AdditionalInfo
+			AdditionalInfo,
+			[Responsible DBA Team]
 		)
 		SELECT
-			CheckId					= {CheckId} ,
+			CheckId					= @CheckId ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
@@ -212,7 +213,8 @@
 					ELSE
 						2	-- Medium
 				END ,
-			AdditionalInfo			= @AdditionalInfo;
+			AdditionalInfo			= @AdditionalInfo,
+			[Responsible DBA Team]					= N'Production';
 
 		DROP TABLE
 			#FragmentedIndexes;

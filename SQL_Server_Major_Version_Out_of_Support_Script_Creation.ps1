@@ -5,7 +5,7 @@
 )
 
 # Define the URL
-$url = "https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-end-of-support-overview?view=sql-server-ver16"
+$url = "https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-end-of-support-overview"
 
 # Fetch the HTML content
 $html = Invoke-WebRequest -Uri $url -TimeoutSec 10
@@ -181,10 +181,11 @@ $MainstreamScript_End =
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
-			AdditionalInfo
+			AdditionalInfo,
+            [Responsible DBA Team]
 		)
 		SELECT
-			CheckId					= {CheckId} ,
+			CheckId					= @CheckId ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
@@ -217,7 +218,8 @@ $MainstreamScript_End =
 				END,
 			RecommendationEffort	= 1,
 			RecommendationRisk		= 3,
-			AdditionalInfo			= @AdditionalInfo;
+			AdditionalInfo			= @AdditionalInfo,
+            [Responsible DBA Team]					= N'Production/Development';
 "
 $ExtendedScript_End = 
 "
@@ -231,10 +233,11 @@ $ExtendedScript_End =
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
-			AdditionalInfo
+			AdditionalInfo,
+            [Responsible DBA Team]
 		)
 		SELECT
-			CheckId					= {CheckId} ,
+			CheckId					= @CheckId ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
@@ -267,7 +270,8 @@ $ExtendedScript_End =
 				END,
 			RecommendationEffort	= 1,
 			RecommendationRisk		= 3,
-			AdditionalInfo			= @AdditionalInfo;
+			AdditionalInfo			= @AdditionalInfo,
+            [Responsible DBA Team]					= N'Production/Development';
 "
 
     $MainstreamScriptHeader + $ValuesList + $MainstreamScriptFooter + $MainstreamScript_End | Out-File $OutputScriptFilePath1 -Force

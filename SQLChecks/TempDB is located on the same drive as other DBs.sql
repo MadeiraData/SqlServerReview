@@ -1,38 +1,34 @@
 /*
 	DESCRIPTION:
-		The benefits of having multiple tempdb files can be lost if one of those files grows larger than the other files. 
-		This condition will evaulate to True if your tempdb files are not the same size.
- 		The query counts the distinct tempdb file sizes from sys.master_files. 
- 
-		See Also:
-		https://blogs.sentryone.com/aaronbertrand/sql-server-2016-tempdb-fixes/
-		http://www.sqlskills.com/blogs/paul/correctly-adding-data-files-tempdb/
+		This script verifies if tempdb is on the same drive as other database files.
+		Having tempdb on the same drive as other databases can cause I/O contention, affecting overall database performance.
+
+		https://learn.microsoft.com/en-us/sql/relational-databases/databases/tempdb-database
 
 */
-
-DECLARE
-	@TempDB_NumOfFiles		INT,
-	@TempDB_Unequal_sizes	INT
-
-SELECT
-	@TempDB_NumOfFiles		= COUNT([file_id]),
-	@TempDB_Unequal_sizes	= COUNT(DISTINCT size)
-FROM
-	sys.master_files
-WHERE
-	database_id = 2
-	AND [type_desc] != 'LOG';
 
 SET @AdditionalInfo =
 	(
 		SELECT
-			@TempDB_NumOfFiles		AS NumOfFiles,
-			@TempDB_Unequal_sizes	AS UnequalSize
+			DB_NAME(database_id)	AS DatabaseName,
+			[name]					AS [FileName],
+			physical_name			AS [Location]
+		FROM
+			sys.master_files AS DBs
 		WHERE
-			@TempDB_Unequal_sizes > 1
+			DBs.database_id != DB_ID('tempdb')
+			AND EXISTS
+					(
+						SELECT 1
+						FROM
+							sys.master_files AS Tdb
+						WHERE
+							Tdb.database_id = DB_ID('tempdb')
+							AND LEFT(DBs.physical_name, 2) = LEFT(Tdb.physical_name, 2)
+			)
 		FOR XML
 			PATH (N'') ,
-			ROOT (N'TempDB')
+			ROOT (N'TempDBonSameLocationWithDBs')
 	);
 
 		INSERT INTO

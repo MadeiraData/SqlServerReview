@@ -1,34 +1,25 @@
-
 /*
 	DESCRIPTION:
-		DB Configuration: Auto create stats is disabled.
-		This may cause poor query performance due to suboptimal query plans.
-		Auto-create statistics should be enabled.
-		 
-		Remediation command:
-		ALTER DATABASE CURRENT SET AUTO_CREATE_STATISTICS ON;
-		 
-		More info:
-		https://docs.microsoft.com/sql/relational-databases/statistics/statistics
+		This script checks if the tempdb files are stored on the C drive.
+		Storing tempdb on the C drive can lead to performance issues and potential conflicts with the operating system files.
 
-
+		https://learn.microsoft.com/en-us/sql/relational-databases/databases/tempdb-database
 */
-		SET @AdditionalInfo =
-			(
-				SELECT
-					DatabaseName = [name]
-				FROM
-					#sys_databases
-				WHERE
-					is_auto_create_stats_on = 0
-				AND
-					source_database_id IS NULL		-- Not a database snapshots
-				ORDER BY
-					database_id ASC
-				FOR XML
-					PATH (N'') ,
-					ROOT (N'Databases')
-			);
+
+SET @AdditionalInfo =
+	(
+		SELECT
+			[name],
+			physical_name	AS [Location]
+		FROM
+			sys.master_files
+		WHERE
+			database_id = DB_ID('tempdb')
+			AND physical_name LIKE 'C:%'
+		FOR XML
+			PATH (N'') ,
+			ROOT (N'TempDBonCdrive')
+	);
 
 		INSERT INTO
 			#Checks
@@ -57,23 +48,24 @@
 			CurrentStateImpact		=
 				CASE
 					WHEN @AdditionalInfo IS NULL
-						THEN 0	-- None
+						THEN 0
 					ELSE
-						3	-- High
+						2	-- High
 				END ,
 			RecommendationEffort	=
 				CASE
 					WHEN @AdditionalInfo IS NULL
-						THEN 0	-- None
+						THEN 0
 					ELSE
-						1	-- Low
+						2	-- High
 				END ,
 			RecommendationRisk		=
 				CASE
 					WHEN @AdditionalInfo IS NULL
-						THEN 0	-- None
+						THEN 0
 					ELSE
 						1	-- Low
 				END ,
 			AdditionalInfo			= @AdditionalInfo,
 			[Responsible DBA Team]					= N'Production';
+

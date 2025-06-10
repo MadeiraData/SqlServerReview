@@ -25,7 +25,7 @@ DECLARE
 		master.sys.master_files
 	WHERE
 		database_id = 2
-		AND [type] = 0;
+		AND [Type] = 0;
 
 	-- Determine recommended number of TempDB files based on best practices
 	SET @RecommendedTempDBFiles =
@@ -42,15 +42,19 @@ DECLARE
 				RecommendedFiles = @RecommendedTempDBFiles,
 				ContentionRisk = 
 					CASE 
-						WHEN @TempDBFiles = @RecommendedTempDBFiles THEN 'Optimal'
+						--WHEN @TempDBFiles = @RecommendedTempDBFiles THEN 'Optimal'
 						WHEN @TempDBFiles > @CPUCount THEN 'Potential Overhead (Too Many Files)'
 						WHEN @TempDBFiles < @RecommendedTempDBFiles THEN 'Potential Contention (Too Few Files)'
 						WHEN @CPUCount > 8 AND @TempDBFiles % 4 <> 0 THEN 'Not a multiple of 4 (Consider Adjusting)'
-						ELSE 'Likely OK'
+						--ELSE 'Likely OK'
 					END
+			WHERE
+				@TempDBFiles <> @RecommendedTempDBFiles
+				OR (@CPUCount > 8 AND @TempDBFiles % 4 <> 0)
 			FOR XML PATH(''), 
 			ROOT('TempDBConfiguration')
 		);
+
 
 	-- Insert Check Results into the #Checks Table
 	INSERT INTO #Checks
@@ -62,10 +66,11 @@ DECLARE
 		CurrentStateImpact,
 		RecommendationEffort,
 		RecommendationRisk,
-		AdditionalInfo
+		AdditionalInfo,
+		[Responsible DBA Team]
 	)
 	SELECT
-		CheckId                 = {CheckId},
+		CheckId                 = @CheckId,
 		Title                   = N'{CheckTitle}',
 		RequiresAttention        = 
 			CASE 
@@ -81,6 +86,7 @@ DECLARE
 				WHEN @TempDBFiles = @RecommendedTempDBFiles THEN 0
 				ELSE 2
 			END,
-		RecommendationEffort    = 1,  -- Low effort to adjust
+		RecommendationEffort    = 2,  -- Low effort to adjust
 		RecommendationRisk      = 1,  -- Low risk to adjust
-		AdditionalInfo          = @AdditionalInfo;
+		AdditionalInfo          = @AdditionalInfo,
+		[Responsible DBA Team]					= N'Production';

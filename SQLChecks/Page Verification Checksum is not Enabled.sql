@@ -23,7 +23,7 @@
 						ELSE page_verify_option_desc COLLATE database_default	
 					END													AS SetOption 
 				FROM 
-					sys.databases
+					#sys_databases
 				WHERE 
 					page_verify_option_desc COLLATE database_default != 'CHECKSUM'
 				FOR XML 
@@ -41,10 +41,11 @@
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
-			AdditionalInfo
+			AdditionalInfo,
+			[Responsible DBA Team]
 		)
 		SELECT
-			CheckId					= {CheckId} ,
+			CheckId					= @CheckId ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
@@ -75,7 +76,8 @@
 					ELSE
 						1	-- Low
 				END ,
-			AdditionalInfo			= @AdditionalInfo;
+			AdditionalInfo			= @AdditionalInfo,
+			[Responsible DBA Team]					= N'Production';
 
 
 

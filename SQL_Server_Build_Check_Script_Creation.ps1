@@ -4,7 +4,7 @@
 )
 
 # Define the URL
-$url = "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/main/support/sql/releases/download-and-install-latest-updates.md"
+$url = "https://learn.microsoft.com/en-us/troubleshoot/sql/releases/download-and-install-latest-updates"
 
 # Fetch the HTML content
 $html = Invoke-WebRequest -Uri $url -TimeoutSec 10
@@ -20,8 +20,8 @@ if ($html.StatusCode -eq 200) {
     $tables = $html.ParsedHtml.getElementsByTagName("table")
     $builds = @()
 
-    # Iterate through tables, starting from the 3rd one (index 2)
-    for ($i = 2; $i -lt $tables.length; $i++) {
+    # Iterate through tables, starting from the 2nd one (index 1)
+    for ($i = 1; $i -lt $tables.length; $i++) {
         $table = $tables[$i]
         $rows = $table.getElementsByTagName("tr")
 
@@ -113,10 +113,11 @@ END
 			CurrentStateImpact ,
 			RecommendationEffort ,
 			RecommendationRisk ,
-			AdditionalInfo
+			AdditionalInfo,
+            [Responsible DBA Team]
 		)
 		SELECT
-			CheckId					= {CheckId} ,
+			CheckId					= @CheckId ,
 			Title					= N'{CheckTitle}' ,
 			RequiresAttention		=
 				CASE
@@ -147,7 +148,8 @@ END
 					ELSE
 						2	-- Medium
 				END ,
-			AdditionalInfo			= @AdditionalInfo;
+			AdditionalInfo			= @AdditionalInfo,
+            [Responsible DBA Team]					= N'Production/Development';
 
 "
 

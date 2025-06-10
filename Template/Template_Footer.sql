@@ -36,6 +36,7 @@ SELECT
 			WHEN 3 THEN N'High'
 		END ,
 	[Additional Info]		= AdditionalInfo ,
+	[Responsible DBA Team],
 	[Instance Score Impact]	= CAST (ROUND (CAST (CurrentStateImpact AS DECIMAL(19,2)) / (SELECT CAST (SUM (WorstCaseImpact) AS DECIMAL(19,2)) FROM #Checks) * 100.0 , 0) AS TINYINT)
 FROM
 	#Checks
@@ -56,7 +57,8 @@ GO
 SELECT
 	[Check Id]				= CheckId ,
 	[Problem Description]	= Title ,
-	[Additional Info]		= AdditionalInfo
+	[Additional Info]		= AdditionalInfo,
+	[Responsible DBA Team]
 FROM
 	#Checks
 WHERE

@@ -2,11 +2,6 @@ USE
 	[master];
 GO
 
-EXEC sys.sp_configure N'show advanced options', N'0';
-GO
-RECONFIGURE
-GO
-
 DECLARE
 	@DatabaseName	AS SYSNAME ,
 	@Command		AS NVARCHAR(MAX);

@@ -1,30 +1,30 @@
 
 /*
 	DESCRIPTION:
-		If this option is enabled, SQL Server will run the sqlservr.exe process and threads as High Priority instead of its usual Normal priority. 
-		Hence, when SQL Server service will request CPU, other processes in need of CPU time won’t be prioritized. 
-		In some scenarios it can lead to problems and most of the time it won’t bring any benefit. 
-		Microsoft do not recommend to enable this feature, see this Microsoft Support article (search for Priority Boost).
+		Instant file initialization (IFI) allows SQL Server to skip the zero-writing step and begin using the allocated space immediately for data files. 
+		It doesn’t impact growths of your transaction log files (untill SQL Server 2022 (16.x)), those still need all the zeroes.
 
 	More Info/sources:
-		https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/configure-the-priority-boost-server-configuration-option
-		https://www.brentozar.com/blitz/priority-boost
-		https://www.sqlbadpractices.com/boost-sql-server-priority
-		
+		https://learn.microsoft.com/en-us/sql/relational-databases/databases/database-instant-file-initialization
+		https://www.sqlshack.com/sql-server-setup-instant-file-initialization-ifi
+		https://www.brentozar.com/blitz/instant-file-initialization
+
 */
 
 		SET @AdditionalInfo =
 			(
 				SELECT
-					'Priority Boost is enabled'
-				FROM 
-					sys.configurations
+					servicename								AS ServiceName,
+					service_account							AS ServiceAccount,
+					instant_file_initialization_enabled		AS IsIFIenabled
+				FROM
+					sys.dm_server_services
 				WHERE
-					[name] = 'priority boost'
-					AND CONVERT(int, [value]) = 0
+					servicename LIKE 'SQL Server (%'
+					AND instant_file_initialization_enabled != N'Y'
 				FOR XML
 					PATH (N'') ,
-					ROOT (N'PriorityBoost')
+					ROOT (N'IFI')
 			);
 
 		INSERT INTO
@@ -73,5 +73,5 @@
 						1	-- Low
 				END ,
 			AdditionalInfo			= @AdditionalInfo,
-			[Responsible DBA Team]					= N'Production';
+			[Responsible DBA Team]					= N'Production/Development';
 

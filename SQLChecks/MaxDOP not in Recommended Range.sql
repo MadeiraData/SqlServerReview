@@ -107,10 +107,11 @@ INSERT INTO #Checks
     CurrentStateImpact,
     RecommendationEffort,
     RecommendationRisk,
-    AdditionalInfo
+    AdditionalInfo,
+	[Responsible DBA Team]
 )
 SELECT
-	CheckId					= {CheckId} ,
+	CheckId					= @CheckId ,
 	Title					= N'{CheckTitle}' ,
     RequiresAttention = 
         CASE 
@@ -129,4 +130,6 @@ SELECT
             ELSE 2 -- Moderate
         END,
     RecommendationRisk = 1, -- Low risk to change
-    AdditionalInfo = @AdditionalInfo;
+    AdditionalInfo = @AdditionalInfo,
+	[Responsible DBA Team] = N'Production/Development';
+

@@ -52,10 +52,11 @@ INSERT INTO #Checks
     CurrentStateImpact,
     RecommendationEffort,
     RecommendationRisk,
-    AdditionalInfo
+    AdditionalInfo,
+	[Responsible DBA Team]
 )
 SELECT
-    CheckId                 = {CheckId},
+    CheckId                 = @CheckId,
     Title                   = N'{CheckTitle}',
     RequiresAttention        = 
 								CASE 
@@ -77,4 +78,5 @@ SELECT
 									WHEN (@ProductVersion >= 13 AND @AutoGrowAllFiles = 0)
 											OR (@ProductVersion < 13 AND @TF1117Enabled = 0) THEN @AdditionalInfo
 									ELSE NULL
-								END
+								END,
+	[Responsible DBA Team]					= N'Production'
