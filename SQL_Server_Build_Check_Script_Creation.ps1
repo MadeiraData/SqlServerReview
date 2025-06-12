@@ -42,7 +42,7 @@ if ($html.StatusCode -eq 200) {
 
     # Convert the parsed data to a DataTable
     $dataTable = New-Object System.Data.DataTable
-    $dataTable.Columns.Add("Version", [string])
+    $dataTable.Columns.Add("Version", [string]) | Out-Null
 
     # Populate the DataTable
     $builds | ForEach-Object {

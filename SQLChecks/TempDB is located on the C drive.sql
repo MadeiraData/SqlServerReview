@@ -9,15 +9,15 @@
 SET @AdditionalInfo =
 	(
 		SELECT
-			[name],
-			physical_name	AS [Location]
+			[name]			AS [@name],
+			physical_name	AS [@Location]
 		FROM
 			sys.master_files
 		WHERE
 			database_id = DB_ID('tempdb')
 			AND physical_name LIKE 'C:%'
 		FOR XML
-			PATH (N'') ,
+			PATH (N'File') ,
 			ROOT (N'TempDBonCdrive')
 	);
 

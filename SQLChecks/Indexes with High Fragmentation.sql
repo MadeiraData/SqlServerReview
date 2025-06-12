@@ -13,7 +13,8 @@
 		https://www.mssqltips.com/sqlservertip/4331/sql-server-index-fragmentation-overview/
 
 */
-
+IF '$(CheckIndexFragmentation)' = 'Yes'
+BEGIN
 		DECLARE
 			@DatabaseName		AS SYSNAME ,
 			@Command			AS NVARCHAR(MAX) ,
@@ -165,6 +166,14 @@
 					AUTO ,
 					ROOT (N'FragmentedIndexes')
 			);
+			
+		DROP TABLE
+			#FragmentedIndexes;
+END
+ELSE
+BEGIN
+	SET @AdditionalInfo = '<SKIPPED>Index fragmentation check was skipped. Index fragmentation health cannot be guaranteed on this server.</SKIPPED>'
+END
 
 		INSERT INTO
 			#Checks
@@ -215,6 +224,3 @@
 				END ,
 			AdditionalInfo			= @AdditionalInfo,
 			[Responsible DBA Team]					= N'Production';
-
-		DROP TABLE
-			#FragmentedIndexes;

@@ -3,16 +3,12 @@ USE
 GO
 
 
-:setvar ThresholdParam 10
+:setvar CheckIndexFragmentation "Yes"
 GO
 
 
 :on error exit
 GO
-
-
-DECLARE
-	@SkipIntensiveChecks			AS BIT = 0;		-- Set this to 1 to skip intensive checks, 0 to include them (default)
 
 SET NOCOUNT ON;
 SET DEADLOCK_PRIORITY -10;
@@ -153,7 +149,7 @@ IF	(
 	)
 	OR @EngineEdition IN (5, 8)			-- Azure SQL Database;  Azure SQL Managed Instance
 BEGIN
-	SET @SQLcmd = @SQLcmd + N'	HostName				= HOST_NAME () ,													-- Applies to: SQL Server 2016 (13.x) and later; Azure SQL Database;  Azure SQL Managed Instance
+	SET @SQLcmd = @SQLcmd + N'	MachineServerName				= ISNULL(SERVERPROPERTY(''ComputerNamePhysicalNetBIOS''), SERVERPROPERTY (''ServerName'')) ,	-- Applies to: SQL Server 2016 (13.x) and later; Azure SQL Database;  Azure SQL Managed Instance
 '
 END
 

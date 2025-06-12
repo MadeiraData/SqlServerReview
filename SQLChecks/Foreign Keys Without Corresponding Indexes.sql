@@ -165,17 +165,28 @@ ORDER BY
 		SET @AdditionalInfo =
 			(
 				SELECT
-					DBname,
-					SchemaName,
-					TableName,
-					ForeignKeyName,
-					ForeignKeyColumns,
-					ReferencedSchemaName,
-					ReferencedTableName
+					DatabaseName = [Database].DBname,
+					[FK].SchemaName,
+					[FK].TableName,
+					[FK].ForeignKeyName,
+					[FK].ForeignKeyColumns,
+					[FK].ReferencedSchemaName,
+					[FK].ReferencedTableName
 				FROM
-					@tbk_FKwithoutCorrespondingIndexes					
+					(
+						SELECT DISTINCT
+							DBname
+						FROM
+							@tbk_FKwithoutCorrespondingIndexes
+					)
+					AS
+						[Database]
+				INNER JOIN
+					@tbk_FKwithoutCorrespondingIndexes AS [FK]
+				ON
+					[Database].DBname = [FK].DBname				
 				FOR XML
-					PATH (N'ForeignKey'),
+					AUTO,
 					ROOT (N'FK_WithoutCorrespondingIndexes')
 			);
 

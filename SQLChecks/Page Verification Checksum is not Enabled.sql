@@ -17,17 +17,17 @@
 		SET @AdditionalInfo =
 			(
 				SELECT
-					QUOTENAME([name]) COLLATE database_default			AS DBname,
+					QUOTENAME([name]) COLLATE database_default			AS [@DBname],
 					CASE
 						WHEN page_verify_option_desc COLLATE database_default = 'NONE'	THEN	'Disabled'
 						ELSE page_verify_option_desc COLLATE database_default	
-					END													AS SetOption 
+					END													AS [@SetOption]
 				FROM 
 					#sys_databases
 				WHERE 
 					page_verify_option_desc COLLATE database_default != 'CHECKSUM'
 				FOR XML 
-					PATH (N'') ,
+					PATH (N'Database') ,
 					ROOT (N'PageVerificationChecksum')
 			);
 

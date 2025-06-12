@@ -14,8 +14,8 @@
 		SET @AdditionalInfo =
 			(
 				SELECT
-					[name]		AS DBName,
-					'OFF'		AS CurrentState	 
+					[name]		AS [@DBName],
+					state_desc	AS [@CurrentState]	 
 				FROM 
 					#sys_databases
 				WHERE
@@ -26,7 +26,7 @@
 					AND database_id > 4				-- exclude system databases
 					AND [name] != 'rdsadmin'		-- exclude AWS RDS system database
 				FOR XML
-					PATH (N'') ,
+					PATH (N'Database') ,
 					ROOT (N'QSnotEnabled')
 			);
 

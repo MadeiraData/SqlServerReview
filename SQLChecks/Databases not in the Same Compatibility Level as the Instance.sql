@@ -27,8 +27,8 @@
 		SET @AdditionalInfo =
 			(
 				SELECT
-					DatabaseName = [name],
-					[compatibility_level]
+					[@DatabaseName] = [name],
+					[@compatibility_level] = [compatibility_level]
 				FROM
 					#sys_databases
 				WHERE
@@ -38,7 +38,7 @@
 				ORDER BY
 					database_id ASC
 				FOR XML
-					PATH (N'') ,
+					PATH (N'Database') ,
 					ROOT (N'Databases')
 			);
 

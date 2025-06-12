@@ -31,10 +31,10 @@ if ($html.StatusCode -eq 200) {
     		
     # Convert the parsed data to a DataTable
     $dataTable = New-Object System.Data.DataTable
-    $dataTable.Columns.Add("Version", [string])
-    $dataTable.Columns.Add("ReleaseYear", [string])
-    $dataTable.Columns.Add("MainstreamSupportEndYear", [string])
-    $dataTable.Columns.Add("ExtendedSupportEndYear", [string])
+    $dataTable.Columns.Add("Version", [string]) | Out-Null
+    $dataTable.Columns.Add("ReleaseYear", [string]) | Out-Null
+    $dataTable.Columns.Add("MainstreamSupportEndYear", [string]) | Out-Null
+    $dataTable.Columns.Add("ExtendedSupportEndYear", [string]) | Out-Null
 
     $builds | ForEach-Object {
         $row = $dataTable.NewRow()
