@@ -20,8 +20,18 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       
-      # Generate CHANGLOG compared to previous release, based on a template file and a list of commit type prefixes
-      - name: PSBuild
+      # Generate SQLCheck for SQL Server build version
+      - name: Build SQL Server Version Check
+        run: |
+          .\SQL_Server_Build_Check_Script_Creation.ps1
+                
+      # Generate SQLCheck for SQL Server major version out of support
+      - name: Build SQL Server Major Version out of support check
+        run: |
+          .\SQL_Server_Major_Version_Out_of_Support_Script_Creation.ps1
+               
+      # Generate main check script
+      - name: Main Build
         run: |
           .\Build_Full_CheckScript_For_SQL_Server_Review.ps1
                 
