@@ -17,6 +17,8 @@ if ($html -ne $null -and $html.StatusCode -eq 200 -and $html.ParsedHtml -ne $nul
     # Add a small delay to ensure content is fully loaded
     Start-Sleep -Seconds 5
 
+    try {
+
     # Parse the HTML content to extract the first row of each table, skipping the first two tables
     $tables = $html.ParsedHtml.getElementsByTagName("table")
     $builds = @()
@@ -159,6 +161,12 @@ END
     $SQLBuildScript_Header + $VALUES + $SQLBuildScript_Footer | Out-File $OutputScriptFilePath -Force
     
     Write-Host "Generated: $OutputScriptFilePath"
+    
+    } 
+    catch [Exception]
+    {
+        Write-Host $_.Exception.Message
+    }
 
 } else {
     Write-Host "Internet connection is not available. Output file will not be changed."

@@ -14,6 +14,8 @@ $html = Invoke-WebRequest -Uri $url -TimeoutSec 10
 # Check for internet connection
 if ($html -ne $null -and $html.StatusCode -eq 200 -and $html.ParsedHtml -ne $null) {
 
+    try {
+
     # Parse the HTML content to extract the Lifecycle dates table
     $tables = $html.ParsedHtml.getElementsByTagName("table")
     $builds = @()
@@ -284,6 +286,12 @@ $ExtendedScript_End =
     $ExtendedScriptHeader + $ValuesList + $ExtendedScriptFooter + $ExtendedScript_End | Out-File $OutputScriptFilePath2 -Force
     
     Write-Host "Generated: $OutputScriptFilePath2"
+    
+    } 
+    catch [Exception]
+    {
+        Write-Host $_.Exception.Message
+    }
 
 } else {
     Write-Host "Internet connection is not available. Output file will not be changed."
