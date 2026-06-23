@@ -55,7 +55,8 @@ if ($html.StatusCode -eq 200) {
     $VALUES = ""
     foreach ($row in $dataTable.Rows) {
         $Version = $($row["Version"])
-        $VALUES += "('$Version')," 
+        $VALUES += "('$Version'),"
+        Write-Host "Saving version $Version" 
     }
 
     # Remove the trailing comma
@@ -155,6 +156,8 @@ END
 
     # Output the full SQL script to the file
     $SQLBuildScript_Header + $VALUES + $SQLBuildScript_Footer | Out-File $OutputScriptFilePath -Force
+    
+    Write-Host "Generated: $OutputScriptFilePath"
 
 } else {
     Write-Host "Internet connection is not available. Output file will not be changed."

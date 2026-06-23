@@ -17,8 +17,8 @@ if ($html.StatusCode -eq 200) {
     $tables = $html.ParsedHtml.getElementsByTagName("table")
     $builds = @()
 
-    # Assuming the Lifecycle dates table is the first table on the page
-    $lifecycleTable = $tables[1]
+    # Assuming the Lifecycle dates table is the second table on the page
+    $lifecycleTable = $tables[2]
     for ($i = 1; $i -lt $lifecycleTable.rows.length; $i++) {
         $row = $lifecycleTable.rows[$i]
         $builds += @{
@@ -54,6 +54,8 @@ if ($html.StatusCode -eq 200) {
         $ExtendedSupportEndYear = $($row.ExtendedSupportEndYear)
 
         $ValuesList += "('$Version', '$ReleaseYear', '$MainstreamSupportEndYear', '$ExtendedSupportEndYear'),"
+        Write-Host "Saving version $Version" 
+
     }
 
    # Remove the trailing comma
@@ -275,7 +277,13 @@ $ExtendedScript_End =
 "
 
     $MainstreamScriptHeader + $ValuesList + $MainstreamScriptFooter + $MainstreamScript_End | Out-File $OutputScriptFilePath1 -Force
+
+    Write-Host "Generated: $OutputScriptFilePath1"
+
     $ExtendedScriptHeader + $ValuesList + $ExtendedScriptFooter + $ExtendedScript_End | Out-File $OutputScriptFilePath2 -Force
+    
+    Write-Host "Generated: $OutputScriptFilePath2"
+
 } else {
     Write-Host "Internet connection is not available. Output file will not be changed."
 }
