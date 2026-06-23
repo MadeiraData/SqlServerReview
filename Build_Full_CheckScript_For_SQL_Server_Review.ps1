@@ -8,8 +8,8 @@
 ,[string]$CheckScriptsFolderPath = "SQLChecks\*"
 ,[string]$CheckScriptsFilter = "*.sql"
 )
-cls
-Set-ExecutionPolicy bypass -Scope Process -force
+
+Set-ExecutionPolicy Bypass -Scope Process -Force
 
 # Execute SQL_Server_Build_Check_Script_Creation.ps1 and wait for it to finish
 Write-Host "Execute SQL_Server_Build_Check_Script_Creation.ps1 and wait for it to finish"
