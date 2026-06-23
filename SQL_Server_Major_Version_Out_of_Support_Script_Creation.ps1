@@ -8,10 +8,11 @@
 $url = "https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-end-of-support-overview"
 
 # Fetch the HTML content
+$html = $null
 $html = Invoke-WebRequest -Uri $url -TimeoutSec 10
 
 # Check for internet connection
-if ($html.StatusCode -eq 200) {
+if ($html -ne $null -and $html.StatusCode -eq 200 -and $html.ParsedHtml -ne $null) {
 
     # Parse the HTML content to extract the Lifecycle dates table
     $tables = $html.ParsedHtml.getElementsByTagName("table")

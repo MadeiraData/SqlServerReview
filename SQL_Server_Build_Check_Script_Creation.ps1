@@ -7,10 +7,11 @@
 $url = "https://learn.microsoft.com/en-us/troubleshoot/sql/releases/download-and-install-latest-updates"
 
 # Fetch the HTML content
+$html = $null
 $html = Invoke-WebRequest -Uri $url -TimeoutSec 10
 
 # Check for internet connection
-if ($html.StatusCode -eq 200) {
+if ($html -ne $null -and $html.StatusCode -eq 200 -and $html.ParsedHtml -ne $null) {
 
 
     # Add a small delay to ensure content is fully loaded
