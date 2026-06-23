@@ -1,6 +1,6 @@
 ﻿Param
 (
- [string]$OutputScriptFilePath = "Full_Check_Script.sql"
+ [string]$OutputScriptFilePath = "SQL_Server_Review_Full_Check_Script.sql"
 ,[string]$TemplateHeaderFilePath = "Template/Template_Header.sql"
 ,[string]$TemplateFooterFilePath = "Template/Template_Footer.sql"
 ,[string]$CheckTemplateHeaderFilePath = "Template/Check_Header.sql"
