@@ -24,6 +24,7 @@ jobs:
       - name: Main Build
         run: |
           .\Build_Full_CheckScript_For_SQL_Server_Review.ps1
+        shell: pwsh -NoProfile -command ". '{0}'"
                 
       - name: Upload Output Script to Release
         uses: svenstaro/upload-release-action@v2
