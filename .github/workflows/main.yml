@@ -30,6 +30,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: Full_Check_Script.sql
+          file: SQL_Server_Review_Full_Check_Script.sql
           tag: ${{ github.ref }}
           overwrite: true
