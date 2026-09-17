@@ -6,7 +6,7 @@ GO
 CREATE LOGIN
 	SSR_Reader
 WITH
-	PASSWORD = 'StrongPassword';
+	PASSWORD = 'StrongPassword123!@#';
 GO
 
 
