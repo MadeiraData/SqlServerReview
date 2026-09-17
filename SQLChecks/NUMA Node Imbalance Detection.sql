@@ -109,7 +109,7 @@ SELECT
 FROM
 	Result
 WHERE
-	imbalance_factor != 0
+	ABS(imbalance_factor) > 40
 ORDER BY
 	load_type,
 	memory_node_id
