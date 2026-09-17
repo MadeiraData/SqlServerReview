@@ -91,7 +91,7 @@ SELECT
 			END	+ @RecommendationText															AS Recommendation,
 			@RecommendedMaxDOP																	AS RecommendedMaxDOP
 		WHERE
-			@EffectiveMaxDOP != @RecommendedMaxDOP
+			@EffectiveMaxDOP > @RecommendedMaxDOP
 			OR @EffectiveMaxDOP = 1
         FOR XML PATH(N''), 
 		ROOT(N'MaxDOPCheck')
